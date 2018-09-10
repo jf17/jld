@@ -10,6 +10,8 @@ import (
 
 func main() {
 
+	//TODO: Parser pom.xml file
+
 	fileUrl := "http://central.maven.org/maven2/com/google/code/gson/gson/2.8.5/gson-2.8.5.jar"
 
 	fileName := "gson-2.8.5.jar"
