@@ -1,28 +1,74 @@
 package main
 
 import (
+	"encoding/xml"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 )
+
+type DependenciesStr struct {
+	Locations xml.Name        `xml:"project"`
+	Depen     []DependencyStr `xml:"dependencies>dependency"`
+}
+
+type DependencyStr struct {
+	GroupId    string `xml:"groupId"`
+	ArtifactId string `xml:"artifactId"`
+	Version    string `xml:"version"`
+	Scope      string `xml:"scope"`
+}
 
 func main() {
 
-	//TODO: Parser pom.xml file
+	v := DependenciesStr{}
 
-	fileUrl := "http://central.maven.org/maven2/com/google/code/gson/gson/2.8.5/gson-2.8.5.jar"
+	raw_data, err := ioutil.ReadFile("pom.xml")
 
-	fileName := "gson-2.8.5.jar"
-
-	err := DownloadFile(fileName, fileUrl)
 	if err != nil {
-		panic(err)
+		fmt.Printf("error: %v \n", err)
+		os.Exit(1)
 	}
 
-}
+	err = xml.Unmarshal(raw_data, &v)
+	if err != nil {
+		fmt.Printf("error: %v \n", err)
+		os.Exit(1)
+	}
 
+	for i := range v.Depen {
+
+		if v.Depen[i].Scope == "" || v.Depen[i].Scope == "compile" {
+			art := v.Depen[i].ArtifactId
+			ver := v.Depen[i].Version
+
+			fileName := art + "-" + ver + ".jar"
+
+			newGroupID := strings.Replace(v.Depen[i].GroupId, ".", "/", -1)
+
+			mavenUrl := "http://central.maven.org/maven2/"
+
+			fileUrl := mavenUrl + newGroupID + "/" + art + "/" + ver + "/" + fileName
+
+			//	fmt.Println(fileUrl, fileName)
+
+			err := DownloadFile(fileName, fileUrl)
+			if err != nil {
+				panic(err)
+			}
+
+		}
+
+	}
+
+
+	fmt.Println("........ Done !")
+
+}
 
 func DownloadFile(fileName string, url string) error {
 
