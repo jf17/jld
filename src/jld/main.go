@@ -11,6 +11,21 @@ import (
 	"strings"
 )
 
+func WriteStringToFile(filepath, s string) error {
+	fo, err := os.Create(filepath)
+	if err != nil {
+		return err
+	}
+	defer fo.Close()
+
+	_, err = io.Copy(fo, strings.NewReader(s))
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 type DependenciesStr struct {
 	Locations xml.Name        `xml:"project"`
 	Depen     []DependencyStr `xml:"dependencies>dependency"`
@@ -24,6 +39,7 @@ type DependencyStr struct {
 }
 
 func main() {
+	var fileSTR string = "Class-Path: ";
 
 	v := DependenciesStr{}
 
@@ -53,6 +69,8 @@ func main() {
 			mavenUrl := "http://central.maven.org/maven2/"
 
 			fileUrl := mavenUrl + newGroupID + "/" + art + "/" + ver + "/" + fileName
+			
+			fileSTR = fileSTR + "lib/"+fileName + " " ;
 
 			//	fmt.Println(fileUrl, fileName)
 
@@ -65,7 +83,13 @@ func main() {
 
 	}
 
+	//TODO: Parser pom.xml file
 
+	fileName := "listLib.txt"
+	oneFolder := "JAR"
+	fullPath := filepath.Join(oneFolder, fileName)
+	WriteStringToFile(fullPath,fileSTR);
+	
 	fmt.Println("........ Done !")
 
 }
