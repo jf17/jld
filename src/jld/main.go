@@ -66,7 +66,7 @@ func main() {
 
 			newGroupID := strings.Replace(v.Depen[i].GroupId, ".", "/", -1)
 
-			mavenUrl := "http://central.maven.org/maven2/"
+			mavenUrl := "https://repo.maven.org/maven2/"
 
 			fileUrl := mavenUrl + newGroupID + "/" + art + "/" + ver + "/" + fileName
 			
